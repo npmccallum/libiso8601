@@ -84,8 +84,6 @@ static int compare(const iso8601_time *a, const iso8601_time *b)
     return tmpa.usecond - tmpb.usecond;
 }
 
-#include <stdio.h>
-
 static int compare_tz(const iso8601_time *a, const iso8601_time *b)
 {
     struct timeval tva, tvb;
