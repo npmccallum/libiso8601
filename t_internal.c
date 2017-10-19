@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include <internal.h>
+#include "internal.h"
 #include <stdio.h>
 #include <assert.h>
 

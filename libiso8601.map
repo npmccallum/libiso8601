@@ -1,0 +1,22 @@
+{
+global:
+    iso8601_add_days;
+    iso8601_add_hours;
+    iso8601_add_minutes;
+    iso8601_add_months;
+    iso8601_add_seconds;
+    iso8601_add_useconds;
+    iso8601_compare;
+    iso8601_current;
+    iso8601_from_time_t;
+    iso8601_from_timeval;
+    iso8601_from_tm;
+    iso8601_parse;
+    iso8601_to_time_t;
+    iso8601_to_timeval;
+    iso8601_to_tm;
+    iso8601_unparse;
+
+local:
+    *;
+};

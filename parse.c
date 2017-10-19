@@ -90,6 +90,7 @@ static bool parse_weekdate(char *buf, iso8601_time *time)
     switch (buf[0]) {
     case 'T':
         memmove(&buf[0], &buf[1], strlen(&buf[1]) + 1); /* Consume the T. */
+        break;
     case '\0':
         break;
     default:
@@ -110,6 +111,7 @@ static bool parse_date(char *buf, iso8601_time *time)
     switch (buf[0]) {
     case 'T':
         memmove(&buf[0], &buf[1], strlen(&buf[1]) + 1); /* Consume the T. */
+        return true;
     case '\0':
         return true;
     case 'W':
@@ -128,6 +130,7 @@ static bool parse_date(char *buf, iso8601_time *time)
     switch (buf[0]) {
     case 'T':
         memmove(&buf[0], &buf[1], strlen(&buf[1]) + 1); /* Consume the T. */
+        return true;
     case '\0':
         return true;
     }
@@ -193,11 +196,12 @@ static bool parse_end_timezone(char *buf, iso8601_time *time)
     /* Parse the minutes if specified. */
     if (len >= 5) {
         switch (buf[len - 5]) {
-        case '-':
+        case '-': /* fallthrough */
         case '+':
             if (!convert(&buf[len - 2], 0, 2, 0, 59, NULL, &moff))
                 return false;
             len -= 2;
+            break;
         }
     }
 
@@ -206,6 +210,7 @@ static bool parse_end_timezone(char *buf, iso8601_time *time)
         switch (buf[len - 3]) {
         case '-':
             multiplier = -1;
+            /* fallthrough */
         case '+':
             if (!convert(&buf[len - 3], 1, 2, 0, 24, NULL, &hoff))
                 return false;
@@ -336,9 +341,11 @@ static bool parse_year(char *buf, iso8601_time *time)
     switch (buf[0]) {
     case '-':
         multiplier = -1;
+        /* fallthrough */
     case '+':
         sign++;
         digits = 0;
+        break;
     default:
         break;
     }
