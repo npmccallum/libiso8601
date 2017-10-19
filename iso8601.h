@@ -130,6 +130,11 @@ void iso8601_from_time_t(time_t timet, uint32_t usecond, bool localtime,
                          int16_t tzminutes, iso8601_time *time);
 
 /**
+ * Add the specified number of years to the time.
+ */
+void iso8601_add_years(iso8601_time *time, int years);
+
+/**
  * Add the specified number of months to the time.
  */
 void iso8601_add_months(iso8601_time *time, int months);

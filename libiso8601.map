@@ -6,6 +6,7 @@ global:
     iso8601_add_months;
     iso8601_add_seconds;
     iso8601_add_useconds;
+    iso8601_add_years;
     iso8601_compare;
     iso8601_current;
     iso8601_from_time_t;

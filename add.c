@@ -20,6 +20,11 @@
 #include "iso8601.h"
 #include "internal.h"
 
+void iso8601_add_years(iso8601_time *time, int years)
+{
+    time->year += years;
+}
+
 void iso8601_add_months(iso8601_time *time, int months)
 {
     months = ((int) time->month) - 1 + months;
