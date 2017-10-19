@@ -1,0 +1,37 @@
+#!/bin/bash -ex
+
+COMMON="meson git curl findutils $CC"
+
+case "$DISTRO" in
+  osx:*)
+    brew update
+    ;;
+
+  debian:*|ubuntu:*)
+    # This solves an intermittant error when fetching packages on debian
+    sed -i 's|httpredir.debian.org|ftp.us.debian.org|g' /etc/apt/sources.list
+
+    apt-get clean
+
+    while ! apt-get update; do
+        sleep 5
+    done
+
+    while ! apt-get -y \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confnew" \
+        dist-upgrade; do
+        sleep 5
+    done
+
+    while ! apt-get -y install $COMMON build-essential; do
+        sleep 5
+    done
+    ;;
+
+  fedora:*)
+    dnf -y clean all
+    dnf -y --setopt=deltarpm=0 update
+    dnf -y install $COMMON
+    ;;
+esac

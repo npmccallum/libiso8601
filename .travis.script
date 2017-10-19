@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+
+[ "$CC" == "gcc" ] && export CFLAGS=-coverage
+[ "$CC" == "gcc" ] && export LDFLAGS=-lgcov
+
+mkdir build
+cd build
+
+meson ..
+ninja -v
+ninja test
+
+if [ "$CC" == "gcc" ]; then
+    bash <(curl -s https://codecov.io/bash)
+fi
