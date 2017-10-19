@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-#ifndef LIBISO8601_H_
-#define LIBISO8601_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -159,5 +158,3 @@ void iso8601_add_seconds(iso8601_time *time, int seconds);
  * Add the specified number of useconds to the time.
  */
 void iso8601_add_useconds(iso8601_time *time, int useconds);
-
-#endif /* LIBISO8601_H_ */

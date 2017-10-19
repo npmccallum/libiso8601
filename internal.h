@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -74,5 +73,3 @@ bool weekdate_to_date(int32_t wyear, uint8_t week, uint8_t wday,
  */
 bool weekdate_from_date(int32_t year, uint8_t month, uint8_t day,
                         int32_t *wyear, uint8_t *week, uint8_t *wday);
-
-#endif /* COMMON_H_ */
