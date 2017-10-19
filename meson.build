@@ -1,4 +1,8 @@
-project('libiso8601', 'c', license: 'ASL-2.0', version: '1')
+project('libiso8601', 'c',
+    meson_version: '>0.36.0',
+    license: 'ASL-2.0',
+    version: '1'
+)
 
 # Global CFLAGS
 size = meson.get_compiler('c').sizeof('time_t', prefix: '#include <time.h>')
