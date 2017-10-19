@@ -34,7 +34,7 @@ typedef struct {
     uint8_t second;
     uint32_t usecond;
     bool localtime;
-    int16_t tzoffset;
+    int16_t tzminutes;
 } iso8601_time;
 
 typedef enum {
@@ -84,7 +84,7 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
  * @return 0: success
  * @return errno: gettimeofday() failed to obtain current time
  */
-int iso8601_current(bool localtime, int16_t tzoffset, iso8601_time *out);
+int iso8601_current(bool localtime, int16_t tzminutes, iso8601_time *out);
 
 /**
  * Compare two time structures.
@@ -104,7 +104,7 @@ void iso8601_to_tm(const iso8601_time *time, struct tm *tm);
  * Convert a tm structure to a time structure.
  */
 void iso8601_from_tm(const struct tm *tm, uint32_t usecond, bool localtime,
-                     int16_t tzoffset, iso8601_time *time);
+                     int16_t tzminutes, iso8601_time *time);
 
 /**
  * Convert a time structure to a timeval structure.
@@ -115,7 +115,7 @@ void iso8601_to_timeval(const iso8601_time *time, struct timeval *tv);
  * Convert a timeval structure to a time structure.
  */
 void iso8601_from_timeval(const struct timeval *tv, bool localtime,
-                          int16_t tzoffset, iso8601_time *time);
+                          int16_t tzminutes, iso8601_time *time);
 
 /**
  * Convert a time structure to time_t.
@@ -126,7 +126,7 @@ void iso8601_to_time_t(const iso8601_time *time, time_t *timet);
  * Convert time_t to a time structure.
  */
 void iso8601_from_time_t(time_t timet, uint32_t usecond, bool localtime,
-                         int16_t tzoffset, iso8601_time *time);
+                         int16_t tzminutes, iso8601_time *time);
 
 /**
  * Add the specified number of months to the time.

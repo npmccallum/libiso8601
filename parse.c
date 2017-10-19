@@ -187,7 +187,7 @@ static bool parse_end_timezone(char *buf, iso8601_time *time)
     /* Look for Z. */
     if (buf[len - 1] == 'Z') {
         buf[len - 1] = '\0';
-        time->tzoffset = 0;
+        time->tzminutes = 0;
         time->localtime = false;
         return true;
     }
@@ -214,14 +214,14 @@ static bool parse_end_timezone(char *buf, iso8601_time *time)
             if (!convert(&buf[len - 3], 1, 2, 0, 24, NULL, &hoff))
                 return false;
 
-            time->tzoffset = ((hoff * 60) + moff) * multiplier;
+            time->tzminutes = ((hoff * 60) + moff) * multiplier;
             time->localtime = false;
             return true;
         }
     }
 
 local:
-    time->tzoffset = 0; /* TODO: Set the UTC offset? */
+    time->tzminutes = 0; /* TODO: Set the UTC offset? */
     time->localtime = true;
     return true;
 }

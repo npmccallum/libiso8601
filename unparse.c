@@ -50,7 +50,7 @@ static bool validate(const iso8601_time *in)
     if (in->minute > 59 || in->second > 60 || in->usecond > 999999)
         return false;
 
-    if (!in->localtime && in->tzoffset > 24 * 60)
+    if (!in->localtime && in->tzminutes > 24 * 60)
         return false;
 
     return true;
@@ -194,16 +194,16 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
     if (in->localtime)
         return 0;
 
-    if (in->tzoffset == 0)
+    if (in->tzminutes == 0)
         return concat(out, len, 1, "%s", "Z") ? 0 : E2BIG;
 
     if (!concat(out, len, 3, "%s%02hhu",
-                in->tzoffset > 0 ? "+" : "-",
-                in->tzoffset / 60))
+                in->tzminutes > 0 ? "+" : "-",
+                in->tzminutes / 60))
         return E2BIG;
-    if (!basic || in->tzoffset % 60 != 0) {
+    if (!basic || in->tzminutes % 60 != 0) {
         if (!concat(out, len, basic ? 2 : 3, "%s%02hhu",
-                    tsep, in->tzoffset % 60))
+                    tsep, in->tzminutes % 60))
             return E2BIG;
     }
 

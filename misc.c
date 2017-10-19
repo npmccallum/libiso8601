@@ -23,14 +23,14 @@
 #include <time.h>
 #include <sys/time.h>
 
-int iso8601_current(bool localtime, int16_t tzoffset, iso8601_time *out)
+int iso8601_current(bool localtime, int16_t tzminutes, iso8601_time *out)
 {
     struct timeval tv;
 
     if (gettimeofday(&tv, NULL) != 0)
         return errno;
 
-    iso8601_from_timeval(&tv, localtime, tzoffset, out);
+    iso8601_from_timeval(&tv, localtime, tzminutes, out);
     return 0;
 }
 
@@ -41,8 +41,8 @@ static void normalize(iso8601_time *time)
 
     /* Normalize timezones. */
     if (!time->localtime) {
-        iso8601_add_minutes(time, time->tzoffset * -1);
-        time->tzoffset = 0;
+        iso8601_add_minutes(time, time->tzminutes * -1);
+        time->tzminutes = 0;
     }
 
     /* Don't normalize leap seconds! */
@@ -152,7 +152,7 @@ void iso8601_to_tm(const iso8601_time *time, struct tm *tm)
 }
 
 void iso8601_from_tm(const struct tm *tm, uint32_t usecond, bool localtime,
-                     int16_t tzoffset, iso8601_time *time)
+                     int16_t tzminutes, iso8601_time *time)
 {
     time->year = tm->tm_year + 1900;
     time->month = tm->tm_mon + 1;
@@ -162,7 +162,7 @@ void iso8601_from_tm(const struct tm *tm, uint32_t usecond, bool localtime,
     time->second = tm->tm_sec;
     time->usecond = usecond;
     time->localtime = localtime;
-    time->tzoffset = tzoffset;
+    time->tzminutes = tzminutes;
 }
 
 void iso8601_to_timeval(const iso8601_time *time, struct timeval *tv)
@@ -173,11 +173,11 @@ void iso8601_to_timeval(const iso8601_time *time, struct timeval *tv)
     tv->tv_usec = time->usecond;
     tv->tv_sec = mktime(&tm);
     if (!time->localtime)
-        tv->tv_sec = timegm(&tm) - time->tzoffset * 60;
+        tv->tv_sec = timegm(&tm) - time->tzminutes * 60;
 }
 
 void iso8601_from_timeval(const struct timeval *tv, bool localtime,
-                          int16_t tzoffset, iso8601_time *time)
+                          int16_t tzminutes, iso8601_time *time)
 {
     time_t seconds = tv->tv_sec;
     struct tm tm;
@@ -186,11 +186,11 @@ void iso8601_from_timeval(const struct timeval *tv, bool localtime,
     if (localtime) {
         assert(localtime_r(&seconds, &tm) != NULL);
     } else {
-        seconds += tzoffset * 60;
+        seconds += tzminutes * 60;
         assert(gmtime_r(&seconds, &tm) != NULL);
     }
 
-    iso8601_from_tm(&tm, tv->tv_usec, localtime, tzoffset, time);
+    iso8601_from_tm(&tm, tv->tv_usec, localtime, tzminutes, time);
 }
 
 void iso8601_to_time_t(const iso8601_time *time, time_t *timet)
@@ -202,8 +202,8 @@ void iso8601_to_time_t(const iso8601_time *time, time_t *timet)
 }
 
 void iso8601_from_time_t(time_t timet, uint32_t usecond, bool localtime,
-                         int16_t tzoffset, iso8601_time *time)
+                         int16_t tzminutes, iso8601_time *time)
 {
     struct timeval tv = { .tv_sec = timet, .tv_usec = usecond };
-    iso8601_from_timeval(&tv, localtime, tzoffset, time);
+    iso8601_from_timeval(&tv, localtime, tzminutes, time);
 }
