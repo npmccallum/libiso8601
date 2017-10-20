@@ -40,7 +40,7 @@ void iso8601_add_months(iso8601_time *time, int months)
 
 void iso8601_add_days(iso8601_time *time, int days)
 {
-    days = ((int) time->day) + days;
+    days += time->day;
 
     if (days > 0) {
         while (days > length_month_days(time->year, time->month)) {
