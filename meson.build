@@ -40,6 +40,15 @@ iso = library('iso8601', ['parse.c', 'unparse.c', 'add.c', 'misc.c'],
     install: true
 )
 
+# PkgConfig
+pkg = import('pkgconfig')
+pkg.generate(
+    libraries: iso,
+    name: meson.project_name(),
+    version: meson.project_version(),
+    description: 'A library for parsing ISO 8601 dates.'
+)
+
 # Tests
 test('internal', executable('t_internal', 't_internal.c', link_with: int))
 test('unparse', executable('t_unparse', 't_unparse.c', link_with: iso))
