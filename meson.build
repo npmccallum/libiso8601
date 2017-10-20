@@ -4,8 +4,27 @@ project('libiso8601', 'c',
     version: '1'
 )
 
+cc = meson.get_compiler('c')
+lnk = []
+
+# Test for sizeof(time_t)
+size = cc.sizeof('time_t', prefix: '#include <time.h>')
+
+# Test for '-Wl,--no-undefined'
+arg = '-Wl,--no-undefined'
+if cc.links('int main (void) { return 0; }', args: arg)
+lnk += arg
+endif
+
+# Test for '-Wl,--version-script,...'
+map = 'libiso8601.map'
+src = meson.current_source_dir()
+arg = '-Wl,--version-script,' + join_paths(src, map)
+if cc.links('int main (void) { return 0; }', args: arg)
+lnk += arg
+endif
+
 # Global CFLAGS
-size = meson.get_compiler('c').sizeof('time_t', prefix: '#include <time.h>')
 add_project_arguments(
     '-DSIZEOF_TIME_T=@0@'.format(size),
     '-Wall',
@@ -30,12 +49,9 @@ add_project_arguments(
 # Libraries
 install_headers('iso8601.h')
 int = static_library('int', ['internal.c', 'internal.h'], pic: true)
-map = 'libiso8601.map'
-src = meson.current_source_dir()
-scr = '-Wl,--version-script,@0@/@1@'.format(src, map)
 iso = library('iso8601', ['parse.c', 'unparse.c', 'add.c', 'misc.c'],
-    link_args: ['-Wl,--no-undefined', scr],
     link_depends: map,
+    link_args: lnk,
     link_with: int,
     install: true
 )
