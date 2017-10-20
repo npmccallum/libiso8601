@@ -204,11 +204,11 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
 
     if (!concat(out, len, 3, "%s%02hhu",
                 in->tzminutes > 0 ? "+" : "-",
-                in->tzminutes / 60))
+                abs(in->tzminutes) / 60))
         return E2BIG;
     if (!basic || in->tzminutes % 60 != 0) {
         if (!concat(out, len, basic ? 2 : 3, "%s%02hhu",
-                    tsep, in->tzminutes % 60))
+                    tsep, abs(in->tzminutes) % 60))
             return E2BIG;
     }
 
