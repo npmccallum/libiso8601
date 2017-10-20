@@ -45,6 +45,22 @@ int main(int argc, const char **argv)
     assert(iso8601_compare(&ta, &tb) > 0);
     iso8601_from_time_t(b + 1, ta.usecond, false, 0, &tb);
     assert(iso8601_compare(&ta, &tb) < 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1 },
+                           &(iso8601_time) { 2000, 2, 1 }) < 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 2, 1 },
+                           &(iso8601_time) { 2000, 1, 1 }) > 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1 },
+                           &(iso8601_time) { 2000, 1, 2 }) < 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 2 },
+                           &(iso8601_time) { 2000, 1, 1 }) > 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1, 0 },
+                           &(iso8601_time) { 2000, 1, 1, 1 }) < 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1, 1 },
+                           &(iso8601_time) { 2000, 1, 1, 0 }) > 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1, 0, 0 },
+                           &(iso8601_time) { 2000, 1, 1, 0, 1 }) < 0);
+    assert(iso8601_compare(&(iso8601_time) { 2000, 1, 1, 0, 1 },
+                           &(iso8601_time) { 2000, 1, 1, 0, 0 }) > 0);
 
 
     /*
