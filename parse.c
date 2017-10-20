@@ -227,7 +227,7 @@ local:
     return true;
 }
 
-static bool parse_end_decimal(char *buf, double *out)
+static void parse_end_decimal(char *buf, double *out)
 {
     int len = strlen(buf);
     for (int i = len - 1; i >= 0 && i >= len - ISO8601_DEC; i--) {
@@ -239,11 +239,10 @@ static bool parse_end_decimal(char *buf, double *out)
 
         *out = strtod(&buf[i], NULL);
         buf[i] = '\0';
-        return true;
+        return;
     }
 
     *out = 0;
-    return true;
 }
 
 static bool normalize_iso8601(char *buf)
@@ -354,9 +353,9 @@ static bool parse_year(char *buf, iso8601_time *time)
     for (int i = sign; i > 0; i++) {
         switch (buf[i]) {
         case 'W':
-            if (sep < 2)
-                goto convert;
-            return false;
+            if (sep >= 2)
+                return false;
+            goto convert;
 
         case '\0':
         case ':':
@@ -433,8 +432,7 @@ int iso8601_parse(const char *in, iso8601_time *out)
         return EINVAL;
 
     /* Parse the decimal off the end. */
-    if (!parse_end_decimal(buf, &decimal))
-        return EINVAL;
+    parse_end_decimal(buf, &decimal);
 
     /* Parse the date. */
     if (!parse_date(buf, &time))

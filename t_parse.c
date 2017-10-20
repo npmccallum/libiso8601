@@ -18,6 +18,7 @@
 
 #include "iso8601.h"
 
+#include <errno.h>
 #include <assert.h>
 #include <time.h>
 #include <stdbool.h>
@@ -72,7 +73,7 @@
     DATE(str "-W32-4", VAL(val, WEEKS(31) + DAYS(3)))
 
 struct test_data {
-    const char * string;
+    const char *string;
     const time_t value;
     const bool notrunct;
 };
@@ -146,6 +147,19 @@ static const struct test_data TEST_DATA[] = {
     {"2000-01-01T00:00:00-25"},
     {"2000-01-01T00:00:00+00:60"},
     {"2000-01-01T00:00:00-00:60"},
+    {"2000-367T00:00:00Z"},
+    {"2000-W53-1T00:00:00Z"},
+    {"2000-W52-8T00:00:00Z"},
+    {"2000-01-01T00:00:00Z0"},
+    {"2000+01+01T00:00:00Z"},
+    {"2000!01!01T00:00:00Z"},
+    {"2000-01-01T00:00:00.0.0Z"},
+    {"2000-01-W01T00:00:00Z"},
+    {""},
+    {"20000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"W2000-01-01"},
+    {"2000--W"},
+
 
     /* Test leap year. */
     DATE("1989-02-29", 0),
@@ -179,6 +193,7 @@ test_one(const char *iso8601, time_t expected)
     err = iso8601_parse(iso8601, &time);
     fprintf(stderr, "return: %d\n", err);
     assert((err == 0) == (expected != 0));
+    assert(err == 0 || err == EINVAL);
     if (expected == 0)
         return;
 
@@ -268,6 +283,8 @@ main(int argc, const char **argv)
     FILE *rnd = NULL;
 
     setenv("TZ", TZ, 1);
+
+    assert(iso8601_parse(NULL, NULL) == EINVAL);
 
     for (int i = 0; TEST_DATA[i].string != NULL; i++)
         test(&TEST_DATA[i]);
