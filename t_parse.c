@@ -103,8 +103,11 @@ static const struct test_data TEST_DATA[] = {
 
     /* Test extended years. */
 #if SIZEOF_TIME_T > 4
+#if !defined(__APPLE__) && !defined(__MACH__)
+    /* macOS mktime() can't handle years before 1900 */
     DATE("-0001-01-01", -62198737200LL),
     WEEKDATE("-0001", -62198478000LL),
+#endif
     DATE("+9999-01-01", 253370782800LL),
     WEEKDATE("+9999", 253371042000LL),
 #endif
