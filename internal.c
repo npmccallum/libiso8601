@@ -101,7 +101,15 @@ bool ordinal_from_date(int32_t year, uint8_t month, uint8_t day,
 bool weekdate_to_date(int32_t wyear, uint8_t week, uint8_t wday,
                       int32_t *year, uint8_t *month, uint8_t *day)
 {
-    int16_t ordinal = --week * 7 + --wday + weekdate_offset(wyear) + 1;
+    int16_t ordinal;
+
+    if (week > length_year_weeks(wyear))
+        return false;
+
+    if (wday < 1 || wday > 7)
+        return false;
+
+    ordinal = --week * 7 + --wday + weekdate_offset(wyear) + 1;
     if (ordinal > 0) {
         if (ordinal > length_year_days(wyear))
             ordinal -= length_year_days(wyear++);
