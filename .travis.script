@@ -1,7 +1,9 @@
 #!/bin/bash -ex
 
-[ "$CC" == "gcc" ] && export CFLAGS=-coverage
-[ "$CC" == "gcc" ] && export LDFLAGS=-lgcov
+if [ "$DISTRO" == "fedora:latest" ] && [ "$CC" == "gcc" ]; then
+    export CFLAGS=-coverage
+    export LDFLAGS=-lgcov
+fi
 
 mkdir build
 cd build
@@ -10,6 +12,6 @@ meson ..
 ninja -v
 ninja test
 
-if [ "$CC" == "gcc" ]; then
+if [ "$DISTRO" == "fedora:latest" ] && [ "$CC" == "gcc" ]; then
     bash <(curl -s https://codecov.io/bash)
 fi
