@@ -18,6 +18,7 @@
 
 #include "iso8601.h"
 
+#include <assert.h>
 #include <time.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -165,40 +166,28 @@ is_ext_year(const char *iso8601)
     return false;
 }
 
-static bool
+static void
 test_one(const char *iso8601, time_t expected)
 {
     iso8601_time time;
     time_t tmp = 0;
     int err;
 
+    fprintf(stderr, "string: %s\n", iso8601);
+    fprintf(stderr, "answer: %ld\n", expected);
+
     err = iso8601_parse(iso8601, &time);
-    if (err != 0) {
-        if (expected == 0)
-            return true; /* Expected failure... */
-        fprintf(stderr, "Error (%d): %s\n", err, strerror(err));
-        return false;
-    }
+    fprintf(stderr, "return: %d\n", err);
+    assert((err == 0) == (expected != 0));
+    if (expected == 0)
+        return;
 
-    /* Expected failure didn't happen... */
-    if (expected == 0) {
-        fprintf(stderr, "Expected '%s' to fail, but it succeeded!\n",
-                iso8601);
-        return false;
-    }
-
-    /* Value is incorrect. */
     iso8601_to_time_t(&time, &tmp);
-    if (tmp != expected) {
-        fprintf(stderr, "Expected '%s' => %ld; got %ld!\n",
-                iso8601, expected, tmp);
-        return false;
-    }
-
-    return true;
+    fprintf(stderr, "result: %ld\n\n", tmp);
+    assert(tmp == expected);
 }
 
-static bool
+static void
 test(const struct test_data *data)
 {
     char basict[1024];
@@ -259,42 +248,51 @@ test(const struct test_data *data)
         if (i > 0 && strcmp(all[i], all[i -1 ]) == 0)
             continue; /* Skip duplicates. */
 
-        fprintf(stderr, "Testing: %s\n", all[i]);
-        if (!test_one(all[i], data->value))
-            return false;
+        test_one(all[i], data->value);
     }
+}
 
-    return true;
+static char
+hex(char v)
+{
+    if (v < 10)
+        return '0' + v;
+
+    return 'A' + v - 10;
 }
 
 int
 main(int argc, const char **argv)
 {
+    static const int iter = 50000;
+    FILE *rnd = NULL;
+
     setenv("TZ", TZ, 1);
 
-    for (int i = 0; TEST_DATA[i].string != NULL; i++) {
-        if (!test(&TEST_DATA[i]))
-            return 1;
-    }
+    for (int i = 0; TEST_DATA[i].string != NULL; i++)
+        test(&TEST_DATA[i]);
 
-    /* Check if we should perform the fuzz test. */
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-f") == 0) {
-            const char *chars = "0123456789TZW:+-";
-            iso8601_time out;
-            char buf[64];
+    rnd = fopen("/dev/urandom", "r");
+    assert(rnd);
 
-            while (true) {
-                memset(buf, 0, sizeof(buf));
-                for (int j = rand() % (sizeof(buf) - 1); j >= 0; j--)
-                    buf[j] = chars[rand() % strlen(chars)];
-                fprintf(stderr, "Testing: %s\n", buf);
-                iso8601_parse(buf, &out); /* Ignore return value. */
-            }
+    for (int i = 0; i < iter; i++) {
+        char buf[64] = {};
+        iso8601_time out;
+        size_t len;
 
-            break;
+        len = rand() % (sizeof(buf) - 1);
+        assert(fread(buf, 1, len, rnd) == len);
+
+        fprintf(stderr, "Fuzzing: ");
+        for (size_t j = 0; j < len; j++) {
+            fputc(hex((buf[j] & 0xf0) >> 4), stderr);
+            fputc(hex((buf[j] & 0x0f) >> 0), stderr);
         }
+        fputc('\n', stderr);
+
+        (void) iso8601_parse(buf, &out);
     }
 
+    fclose(rnd);
     return 0;
 }
