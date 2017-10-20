@@ -38,7 +38,7 @@ add_project_arguments(
     '-Wnested-externs',
     '-Wpointer-arith',
     '-Wshadow',
-    '-Wsign-compare',
+    '-Wno-sign-compare',
     '-Wstrict-prototypes',
     '-Wtype-limits',
     '-Wno-missing-field-initializers',
