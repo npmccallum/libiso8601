@@ -24,6 +24,12 @@
 #include <string.h>
 #include <stdarg.h>
 
+static bool is_leap_second(const iso8601_time *in)
+{
+    return in->month == 12 && in->day == 31 && in->hour == 23 &&
+           in->minute == 59 && in->second == 60 && in->usecond == 0;
+}
+
 static bool validate(const iso8601_time *in)
 {
     if (in == NULL)
@@ -48,10 +54,19 @@ static bool validate(const iso8601_time *in)
                            in->usecond != 0))
         return false;
 
-    if (in->minute > 59 || in->second > 60 || in->usecond > 999999)
+    if (in->minute > 59)
         return false;
 
-    if (!in->localtime && in->tzminutes > 24 * 60)
+    if (in->second > 60)
+        return false;
+
+    if (in->second == 60 && !is_leap_second(in))
+        return false;
+
+    if (in->usecond > 999999)
+        return false;
+
+    if (!in->localtime && abs(in->tzminutes) > 24 * 60)
         return false;
 
     return true;
@@ -101,11 +116,13 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
     const bool basic = (flags & ISO8601_FLAG_BASIC) && ydigits == 4;
     const char *tsep = basic ? "" : ":";
     const char *dsep = basic ? "" : "-";
+    uint16_t ordinal;
+    int32_t year;
+    uint8_t week;
+    uint8_t day;
 
     /* Validate input. */
     if (!validate(in))
-        return EINVAL;
-    if (ydigits < 2 || ydigits > 9)
         return EINVAL;
     if (out == NULL)
         return EINVAL;
@@ -114,13 +131,12 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
     out[0] = '\0';
 
     /* Write the date. */
+    if (!unparse_year(in->year, ydigits, len, out))
+        return E2BIG;
+    if (truncate == ISO8601_TRUNCATE_YEAR)
+        return 0;
     switch (format) {
     case ISO8601_FORMAT_NORMAL:
-        if (!unparse_year(in->year, ydigits, len, out))
-            return E2BIG;
-        if (truncate == ISO8601_TRUNCATE_YEAR)
-            return 0;
-
         if (!concat(out, len, basic ? 2 : 3, "%s%02hhu", dsep, in->month))
             return E2BIG;
         if (truncate == ISO8601_TRUNCATE_MONTH)
@@ -130,19 +146,10 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
             return E2BIG;
         break;
 
-    case ISO8601_FORMAT_WEEKDATE: {
-        int32_t year;
-        uint8_t week;
-        uint8_t day;
-
+    case ISO8601_FORMAT_WEEKDATE:
         if (!weekdate_from_date(in->year, in->month, in->day,
                                 &year, &week, &day))
             return EINVAL;
-
-        if (!unparse_year(in->year, ydigits, len, out))
-            return E2BIG;
-        if (truncate == ISO8601_TRUNCATE_YEAR)
-            return 0;
 
         if (!concat(out, len, basic ? 3 : 4, "%sW%02hhu", dsep, week))
             return E2BIG;
@@ -152,29 +159,16 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
         if (!concat(out, len, basic ? 1 :2, "%s%hhu", dsep, day))
             return E2BIG;
         break;
-    }
 
-    case ISO8601_FORMAT_ORDINAL: {
-        uint16_t ordinal;
-
+    case ISO8601_FORMAT_ORDINAL:
         if (!ordinal_from_date(in->year, in->month, in->day, &ordinal))
             return EINVAL;
 
-        if (!unparse_year(in->year, ydigits, len, out))
-            return E2BIG;
-        if (truncate == ISO8601_TRUNCATE_YEAR)
-            return 0;
-
         if (!concat(out, len, basic ? 3 : 4, "%s%03hu", dsep, ordinal))
             return E2BIG;
-        if (truncate == ISO8601_TRUNCATE_YEAR ||
-            truncate == ISO8601_TRUNCATE_MONTH)
+        if (truncate == ISO8601_TRUNCATE_MONTH)
             return 0;
         break;
-    }
-
-    default:
-        return EINVAL;
     }
     if (truncate == ISO8601_TRUNCATE_DAY)
         return 0;
