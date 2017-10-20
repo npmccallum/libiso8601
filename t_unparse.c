@@ -223,7 +223,72 @@ struct {
         { 2000, 3, 3, 3, 3, 3, 123456, true, 0 },
         "2000-03-03" },
 
-    {}
+    /* Leap Second */
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0 }, "2000-12-31T23:59:60Z" },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_ORDINAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0 }, "2000-366T23:59:60Z" },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_WEEKDATE, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0 }, "2000-W52-7T23:59:60Z" },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0, true }, "2000-12-31T23:59:60" },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_ORDINAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0, true }, "2000-366T23:59:60" },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_WEEKDATE, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 0, true }, "2000-W52-7T23:59:60" },
+
+    /* Large Year */
+    { ISO8601_TRUNCATE_YEAR, ISO8601_FORMAT_NORMAL, 5, ISO8601_FLAG_NONE,
+        { 11111, 1, 1 }, "+11111" },
+    { ISO8601_TRUNCATE_YEAR, ISO8601_FORMAT_NORMAL, 5, ISO8601_FLAG_NONE,
+        { -11111, 1, 1 }, "-11111" },
+
+    /* Invalid Values */
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE, {} },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 111111 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { -111111 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 0, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 13, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 1, 0 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 30 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 25 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 0, 60 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 0, 0, 61 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 0, 0, 0, 1000000 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 0, 0, 0, 0, false, 24 * 60 + 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 0, 0, 0, 0, false, -24 * 60 - 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 24, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 24, 0, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 24, 0, 0, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 2, 11, 23, 59, 60 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 31, 23, 59, 60, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 32 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_ORDINAL, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 32 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_WEEKDATE, 4, ISO8601_FLAG_NONE,
+        { 2000, 12, 32 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 1, ISO8601_FLAG_NONE,
+        { 2000, 1, 1 } },
+    { ISO8601_TRUNCATE_NONE, ISO8601_FORMAT_NORMAL, 10, ISO8601_FLAG_NONE,
+        { 2000, 1, 1 } },
 };
 
 static void test_e2big(iso8601_format format)
@@ -248,13 +313,19 @@ static void test_e2big(iso8601_format format)
 
 int main(int argc, const char **argv)
 {
-    for (size_t i = 0; tests[i].str; i++) {
+    assert(iso8601_unparse(NULL, ISO8601_FLAG_NONE, 4, ISO8601_FORMAT_NORMAL, \
+                           ISO8601_TRUNCATE_NONE, 0, NULL) == EINVAL);
+
+    for (size_t i = 0; i < sizeof(tests) / sizeof(*tests); i++) {
+        const int ret = !tests[i].str ? EINVAL : 0;
         char buf[1024] = {};
 
         fprintf(stderr, "answer: %s\n", tests[i].str);
         assert(iso8601_unparse(&tests[i].time, tests[i].flags,
                                tests[i].ydigits, tests[i].format,
-                               tests[i].truncate, sizeof(buf), buf) == 0);
+                               tests[i].truncate, sizeof(buf), buf) == ret);
+        if (!tests[i].str)
+            continue;
 
         fprintf(stderr, "result: %s\n", buf);
         assert(strcmp(buf, tests[i].str) == 0);

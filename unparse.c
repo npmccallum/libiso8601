@@ -79,8 +79,6 @@ static bool unparse_year(int32_t year, uint8_t ydigits, size_t len, char *out)
     int ret;
 
     /* Create the format string. */
-    if (ydigits < 2 || ydigits > 9)
-        return false;
     fmt[4] = '0' + ydigits;
 
     /* Figure out the sign. */
@@ -131,6 +129,8 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
     out[0] = '\0';
 
     /* Write the date. */
+    if (ydigits < 2 || ydigits > 9)
+        return EINVAL;
     if (!unparse_year(in->year, ydigits, len, out))
         return E2BIG;
     if (truncate == ISO8601_TRUNCATE_YEAR)
