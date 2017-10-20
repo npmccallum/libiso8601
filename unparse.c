@@ -61,6 +61,7 @@ static bool unparse_year(int32_t year, uint8_t ydigits, size_t len, char *out)
 {
     const char *sign = "";
     char fmt[] = "%s%0Xd";
+    int ret;
 
     /* Create the format string. */
     if (ydigits < 2 || ydigits > 9)
@@ -73,8 +74,8 @@ static bool unparse_year(int32_t year, uint8_t ydigits, size_t len, char *out)
     else if (year > 9999)
         sign = "+";
 
-    return snprintf(out, len, fmt, sign, abs(year))
-                >= (ssize_t) (ydigits + strlen(sign));
+    ret = snprintf(out, len, fmt, sign, abs(year));
+    return ret >= (ydigits + strlen(sign)) && ret < len;
 }
 
 static bool concat(char *out, size_t len, ssize_t chars, const char *fmt, ...)
@@ -84,12 +85,13 @@ static bool concat(char *out, size_t len, ssize_t chars, const char *fmt, ...)
     int ret;
 
     size = strlen(out);
+    len -= size;
 
     va_start(ap, fmt);
-    ret = vsnprintf(out + size, len - size, fmt, ap);
+    ret = vsnprintf(out + size, len, fmt, ap);
     va_end(ap);
 
-    return ret >= chars;
+    return ret >= chars && ret < len;
 }
 
 int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
@@ -107,6 +109,8 @@ int iso8601_unparse(const iso8601_time *in, uint32_t flags, uint8_t ydigits,
         return EINVAL;
     if (out == NULL)
         return EINVAL;
+    if (len < 1)
+        return E2BIG;
     out[0] = '\0';
 
     /* Write the date. */
