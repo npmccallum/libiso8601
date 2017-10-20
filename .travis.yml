@@ -2,12 +2,13 @@ language: c
 
 matrix:
   include:
-    - osx_image: xcode8.1
+    - osx_image: xcode9.1
       compiler: clang
       os: osx
       env:
-        - DISTRO=osx:xcode8.1
+        - DISTRO=osx:xcode9.1
         - PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/zlib/lib/pkgconfig
+        - PYTHONPATH=/usr/local/lib/python3.6/site-packages
 
 compiler:
   - clang
@@ -25,31 +26,13 @@ env:
     - DISTRO=ubuntu:devel
 
 before_install:
-  - >
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      docker create --name=foo -t -v `pwd`:/tmp/build -w /tmp/build $DISTRO /bin/cat
-      docker start foo
-    fi
+  - . .travis.functions; docker_start
 
 install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        (env | sed -r 's|^(.*)$|-e\n\1|'; echo foo; echo ./.travis.install)
-            | xargs -d '\n' docker exec;
-    else
-        ./.travis.install;
-    fi
+  - . .travis.functions; docker_exec ./.travis.install
 
 script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        (env | sed -r 's|^(.*)$|-e\n\1|'; echo foo; echo ./.travis.script)
-            | xargs -d '\n' docker exec;
-    else
-        ./.travis.script;
-    fi
+  - . .travis.functions; docker_exec ./.travis.script
 
 after_script:
-  - >
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      docker kill foo
-      docker rm foo
-    fi
+  - . .travis.functions; docker_stop

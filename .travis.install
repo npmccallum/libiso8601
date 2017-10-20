@@ -5,6 +5,10 @@ COMMON="meson git curl findutils $CC"
 case "$DISTRO" in
   osx:*)
     brew update
+    for pkg in meson; do
+        brew ls --versions $pkg || brew install $pkg
+        brew outdated $pkg || brew upgrade $pkg || true
+    done
     ;;
 
   debian:*|ubuntu:*)
