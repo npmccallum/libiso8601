@@ -12,6 +12,10 @@ meson ..
 ninja -v
 ninja test
 
-if [ "$DISTRO" == "fedora:latest" ] && [ "$CC" == "gcc" ]; then
-    bash <(curl -s https://codecov.io/bash)
+if [ "$DISTRO" == "fedora:latest" ]; then
+    if [ "$CC" == "gcc" ]; then
+        bash <(curl -s https://codecov.io/bash)
+    elif [ "$CC" == "clang" ]; then
+        ninja scan-build
+    fi
 fi

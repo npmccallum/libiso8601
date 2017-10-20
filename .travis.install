@@ -37,5 +37,8 @@ case "$DISTRO" in
     dnf -y clean all
     dnf -y --setopt=deltarpm=0 update
     dnf -y install $COMMON
+    if [ "$CC" == "clang" ]; then
+        dnf -y install clang-analyzer
+    fi
     ;;
 esac
