@@ -229,8 +229,15 @@ struct {
 static void test_e2big(iso8601_format format)
 {
     static const iso8601_time time = { 2000, 3, 3, 3, 3, 3, 123456, false, 90 };
+    char tmp[1] = {};
 
-    for (int i = 0, r = E2BIG; r == E2BIG; i++) {
+    assert(iso8601_unparse(&time, ISO8601_FLAG_NONE, 4, format,
+                           ISO8601_TRUNCATE_NONE, 0, NULL) == EINVAL);
+
+    assert(iso8601_unparse(&time, ISO8601_FLAG_NONE, 4, format,
+                           ISO8601_TRUNCATE_NONE, 0, tmp) == E2BIG);
+
+    for (int i = 1, r = E2BIG; r == E2BIG; i++) {
         char buf[i];
         memset(buf, 0, i);
         r = iso8601_unparse(&time, ISO8601_FLAG_NONE, 4, format,
